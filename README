@@ -1,0 +1,88 @@
+utagboot for Motorola Droid 4 xt894
+
+With utagboot we can boot droid 4 directly to any partition on the device
+using the stock Linux kernel that comes with the device.
+
+The way utagboot works is by modifying the stock kernel command line arguments
+using the utags partition on the device. The utags partition seems to be
+for custom ATAGs that also show up on the kernel command line. The utags
+partition can be easily erased and flashed with fastboot.
+
+
+CURRENT LIMITATIONS
+
+For some reason /dev/fb0 is not working and there is no console on the LCD. It
+might be related to the LCD only accepting 2 for display0/update_mode instead
+of 1 for automatic updates.
+
+Also it seems that a warm reset of the device with fastboot reboot can cause
+the device to keep rebooting, this does not seem to happen after a proper
+power cycle.
+
+
+DEPENDENCIES
+
+Shell, Make and fastboot on your PC
+
+
+REFERENCES
+
+For more information how utags work, see "fastboot oem vuln: Android Bootloader
+Vulnerabilities in Vendor Customizations" by Roee Hay. I don't think the
+related fastboot oem to modify utags are available on droid 4 though.
+
+
+INSTALL
+
+First root your device, then reformat the webtop partition and untar the Linux
+distro of your choice there. See also the notes below regarding necessary
+kernel modules for the new root file system.
+
+Then to install utags.bin to the device utags partition by connecting the
+device over USB in fastboot mode and typing:
+
+$ Make install
+
+This will generate a utags.bin file and then write it to the device utags
+partition. On reboot, your device will attempt to boot the stock kernel
+without initrd and run the standard /sbin/init on the rootfs. If you want
+to use a custom kernel command line, you can do it with:
+
+$ make cmdline="console=ttyO2,115200 debug earlyprintk earlycon"
+
+The fastboot mode can be enabled by holding down Volume Down button while
+pressing the power button to turn it on.
+
+
+UNINSTALL
+
+To uninstall utagboot, connect the device in fastboot mode over USB and type:
+
+$ make uninstall
+
+This will erase the utags partition and allow booting the stock Android or
+SafeStrap if that is installed.
+
+
+NOTES
+
+SafeStrap can still be used together with utagboot, but it will be inactive
+when utagboot is active. To use SafeStrap instead, see the uninstall notes.
+
+By default utagboot uses the 1.3GB /dev/mmcblk1p23 webtop partition as the
+root file system, and then you can kexec from there to a newer kernel and
+to a larger partition on the external SD card for example.
+
+Using the 8GB /dev/mmcblk1p25 might work too after re-formatting it to
+ext4. The stock Android kernel will show notes about it though, so please
+make proper back-ups. Using the external SD card should work too.
+
+In order to use serial console and kexec, you need to load the kexec modules
+uart.ko arm_kexec.ko and kexec.ko when the distro installed to rootfs starts
+booting. For information about using the serial console and the related
+kernel modules, please see:
+
+http://muru.com/linux/d4/
+
+You probably also want copy the modules from the stock file system to the
+new rootfs /lib/modules/3.0.8-g448a95f/kernel to have working WLAN.
