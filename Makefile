@@ -1,7 +1,7 @@
 # Using "noinitrd" does not seem to work here, use bogus initrd instead
 def_cmd=initrd=0x8000000,128K console=ttyO2,115200 fbcon=rotate:1 \
-rootwait ro init=/sbin/init
-cmdline=$(def_cmd) root=/dev/mmcblk1p23
+rootwait ro
+cmdline=$(def_cmd) root=/dev/mmcblk1p23 init=/sbin/init
 target=output/utagboot/
 
 kexec_modules_url=http://muru.com/linux/d4/
@@ -17,8 +17,34 @@ uninstall:
 
 utags: clean
 	mkdir -p $(target)
+	echo "Generating default utags.bin using /dev/mmcblk1p23.."
 	scripts/utagboot.sh $(target)utags.bin "$(cmdline)"
 	hexdump -C $(target)utags.bin
+
+	#
+	# NOTE: Custom utags.bin created, please verify it points to
+	# correct init. That is now init=/boot/utagboot/init for
+	# installable utagboot configuration.
+	#
+
+utagboot_utags: clean
+	mkdir -p $(target)
+
+	echo "Generating usable default utags-*.bin files.."
+	scripts/utagboot.sh $(target)utags-mmcblk0p1.bin "$(def_cmd) \
+	root=/dev/mmcblk0p1 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk0p2.bin "$(def_cmd) \
+	root=/dev/mmcblk0p2 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk0p3.bin "$(def_cmd) \
+	root=/dev/mmcblk0p3 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk0p4.bin "$(def_cmd) \
+	root=/dev/mmcblk0p4 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk1p22.bin "$(def_cmd) \
+	root=/dev/mmcblk1p22 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk1p23.bin "$(def_cmd) \
+	root=/dev/mmcblk1p23 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk1p25.bin "$(def_cmd) \
+	root=/dev/mmcblk1p25 init=/boot/utagboot/init"
 
 download_files:
 	mkdir -p download
