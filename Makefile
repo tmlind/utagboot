@@ -9,6 +9,8 @@ kexec_modules_version=0.3
 kexec_modules=ddroid4-mainline-kexec-$(kexec_modules_version).tar.xz
 stock_kernel_modules=$(target)lib/modules/3.0.8-g448a95f/kernel/
 
+version=$$(date +%Y-%m-%d)
+
 install: utags
 	fastboot flash utags utags.bin
 
@@ -62,6 +64,17 @@ install_modules: download_files
 	$(stock_kernel_modules)
 	cp download/droid4-mainline-kexec-$(kexec_modules_version)/kexec.ko \
 	$(stock_kernel_modules)
+
+init_script:
+	cp scripts/device_init.sh $(target)/init
+	chmod a+x $(target)/init
+
+package: utagboot_utags init_script install_modules
+	cp README $(target)
+	cd output && tar zcf ../utagboot-bin-${version}.tar.gz \
+		--wildcards --owner=0 --group=0 utagboot
+	sha256sum utagboot-bin-${version}.tar.gz > \
+		utagboot-bin-${version}.sha256
 
 clean:
 	rm -f $(target)utags*.bin
