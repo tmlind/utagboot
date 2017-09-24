@@ -9,20 +9,63 @@ for custom ATAGs that also show up on the kernel command line. The utags
 partition can be easily erased and flashed with fastboot.
 
 
-CURRENT LIMITATIONS
-
-For some reason /dev/fb0 is not working and there is no console on the LCD. It
-might be related to the LCD only accepting 2 for display0/update_mode instead
-of 1 for automatic updates.
-
-Also it seems that a warm reset of the device with fastboot reboot can cause
-the device to keep rebooting, this does not seem to happen after a proper
-power cycle.
-
-
 DEPENDENCIES
 
-Shell, Make and fastboot on your PC
+Shell, Make and fastboot on your PC. Usable Linux rootfs on a partition
+with recent kexec-tools on the device.
+
+
+LIMITATIONS USING THE STOCK KERNEL
+
+With the stock kernel, CONFIG_VT is disabled making it not very friendly for
+distro use. And the LCD seems to operate only in manual update mode, so using
+the LCD needs customized software. Further, the stock kernel seems to have some
+issues, for example warm reset can cause the device to reboot multiple times.
+And there are issues trying to use the stock kernel and a newer kernel with the
+same distro with stock kernel wanting to use /dev/ttyO2 while newer should be
+using /dev/ttyS2 for serial console.
+
+To work around these issues, it's best to use the stock kernel to boot to a
+Linux distro on a selected root partition enough to just kexec boot a newer
+kernel.
+
+Also note that the stock kernel kexec modules still need work to be usable for
+both Motorola custom dtb format and machine ID and for mainline kernel dtb
+format and generic machine id. Currently only kexec booting the mainline
+kernel works and most likely the older kexec modules need to be installed to
+boot the Lineage OS kernel.
+
+
+BASIC UTAGBOOT SETUP
+
+The root partition for utagboot needs to use a filesystem supported by the stock
+file system such as ext3 or ext4. And the root partition needs to have a usable
+Linux system with at least busybox, recent kexec-tools and basic /dev entries.
+The root partition needs at least /bin/sh, recent kexec-tools and basic /dev
+entries. So basically pretty much any Linux distro can be used for the root
+partition, and busybox based systems will work just fine too. Then utagboot
+needs the following files installed on the root partition:
+
+/boot/utagboot/utags-mmc*.bin	generated utags for various usable root fs
+/boot/utagboot/init		minimal kexec init script for stock kernel
+/boot/utagboot/lib/modules	uart and kexec modules for stock kernel
+/boot/utagboot/utagboot.conf	optional utagboot configuration file
+
+The init script just kexec boots the configured vmlinuz, dtb and initramfs
+as specified in the utagboot.conf file. The valid options for utagboot.conf
+are:
+
+vmlinuz		kernel to load
+dtb		device tree blob to load
+initramfs	initramfs to load
+cmdline		kernel command line
+
+The init script can be interrupted by pressing 'x' on the serial console.
+Note that the stock kernel often crashes during init so it's not very usable
+with Linux distros.
+
+To build a tar.gz package, type make package. See also the INSTALL file for
+installation.
 
 
 REFERENCES
@@ -32,64 +75,16 @@ Vulnerabilities in Vendor Customizations" by Roee Hay. I don't think the
 related fastboot oem to modify utags are available on droid 4 though.
 
 
-INSTALL
-
-First root your device, then reformat the webtop partition and untar the Linux
-distro of your choice there. See also the notes below regarding necessary
-kernel modules for the new root file system. Your should make sure that the
-device is updated to the latest firmware (VRZ_XT894_9.8.2O-72_VZW-18-8_CFC).
-
-To allow updating utags with fastboot, you need to install the permissive
-mbm bootloader from VRZ_XT894_9.8.2O-72_VZW-18-8_CFC with:
-
-$ fastboot flash mbm allow-mbmloader-flashing-mbm.bin
-
-After that you can modify the utags partition with fastboot. Just be careful
-with the eMMC partitions as many of them have checksums and overwriting the
-wrong partitions can brick the device.
-
-Then to install utags.bin to the device utags partition by connecting the
-device over USB in fastboot mode and typing:
-
-$ Make install
-
-This will generate a utags.bin file and then write it to the device utags
-partition. On reboot, your device will attempt to boot the stock kernel
-without initrd and run the standard /sbin/init on the rootfs. If you want
-to use a custom kernel command line, you can do it with:
-
-$ make cmdline="console=ttyO2,115200 debug earlyprintk earlycon"
-
-The fastboot mode can be enabled by holding down Volume Down button while
-pressing the power button to turn it on.
-
-And once you're done, you probably want to do install the stock mbm with:
-
-$ fastboot flash mbm mbm.bin
-
-
-UNINSTALL
-
-To uninstall utagboot, connect the device in fastboot mode over USB and type:
-
-$ make uninstall
-
-This will erase the utags partition and allow booting the stock Android or
-SafeStrap if that is installed.
-
-
 NOTES
 
 SafeStrap can still be used together with utagboot, but it will be inactive
 when utagboot is active. To use SafeStrap instead, see the uninstall notes.
 
-By default utagboot uses the 1.3GB /dev/mmcblk1p23 webtop partition as the
-root file system, and then you can kexec from there to a newer kernel and
-to a larger partition on the external SD card for example.
-
-Using the 8GB /dev/mmcblk1p25 might work too after re-formatting it to
-ext4. The stock Android kernel will show notes about it though, so please
-make proper back-ups. Using the external SD card should work too.
+Usable partitions on the eMMC are mmcblk1p23 and mmcblk1p22. These don't have
+checksums and can be reformatted. Using the 8GB mmcblk1p25 might work too after
+re-formatting it to ext3 or ext4. The stock Android kernel will show notes
+about it though, so please make proper back-ups. It is probably easiest to use
+a reasonably fast micro-SD card as that does not require changes to the eMMC.
 
 In order to use serial console and kexec, you need to load the kexec modules
 uart.ko arm_kexec.ko and kexec.ko when the distro installed to rootfs starts
@@ -99,4 +94,5 @@ kernel modules, please see:
 http://muru.com/linux/d4/
 
 You probably also want copy the modules from the stock file system to the
-new rootfs /lib/modules/3.0.8-g448a95f/kernel to have working WLAN.
+new rootfs /lib/modules/3.0.8-g448a95f/kernel to have working WLAN if you
+need to use the stock kernel.
