@@ -36,7 +36,17 @@ INSTALL
 
 First root your device, then reformat the webtop partition and untar the Linux
 distro of your choice there. See also the notes below regarding necessary
-kernel modules for the new root file system.
+kernel modules for the new root file system. Your should make sure that the
+device is updated to the latest firmware (VRZ_XT894_9.8.2O-72_VZW-18-8_CFC).
+
+To allow updating utags with fastboot, you need to install the permissive
+mbm bootloader from VRZ_XT894_9.8.2O-72_VZW-18-8_CFC with:
+
+$ fastboot flash mbm allow-mbmloader-flashing-mbm.bin
+
+After that you can modify the utags partition with fastboot. Just be careful
+with the eMMC partitions as many of them have checksums and overwriting the
+wrong partitions can brick the device.
 
 Then to install utags.bin to the device utags partition by connecting the
 device over USB in fastboot mode and typing:
@@ -52,6 +62,10 @@ $ make cmdline="console=ttyO2,115200 debug earlyprintk earlycon"
 
 The fastboot mode can be enabled by holding down Volume Down button while
 pressing the power button to turn it on.
+
+And once you're done, you probably want to do install the stock mbm with:
+
+$ fastboot flash mbm mbm.bin
 
 
 UNINSTALL
