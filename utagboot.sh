@@ -1,14 +1,7 @@
 #!/bin/sh
 #
-# utagboot - bootloader for droid 4 xt894
+# utagboot.sh - bootloader configuration script for droid 4 xt894
 #
-
-# Using "noinitrd" does not seem to work here, use bogus initrd instead
-
-default_cmdline="initrd=0x8000000,128K console=ttyO2,115200 fbcon=rotate:1 \
-root=/dev/mmcblk1p23 rootwait ro init=/sbin/init"
-
-target="utags.bin"
 
 function append_hex_32() {
 	file=$1
@@ -50,7 +43,7 @@ function append_ascii_utag() {
 	fi
 
 	if ! echo -n "$string" >> $file; then
-		echo "Could not write to $target"
+		echo "Could not write to $file"
 		exit 1
 	fi
 
@@ -60,23 +53,28 @@ function append_ascii_utag() {
 }
 
 function build_utags() {
-	cmdline="p2a_maserati $1"
+	file=$1
+	cmdline="p2a_maserati $2"
 
-	if [ -f $target ]; then
-		echo "$target already exists, please remove it first"
+	if [ -f ${file} ]; then
+		echo "${file} already exists, please remove it first"
 		exit 1
 	fi
 
-	echo "Appended kernel cmdline:"
+	echo "File: ${file}"
+	echo "Generated kernel cmdline:"
 	echo "$cmdline"
 
-	append_ascii_utag $target $((0xcafe0001)) ""
-	append_ascii_utag $target $((0xcafe0003)) "$cmdline"
-	append_ascii_utag $target $((0xcafe0002)) ""
+	append_ascii_utag ${file} $((0xcafe0001)) ""
+	append_ascii_utag ${file} $((0xcafe0003)) "$cmdline"
+	append_ascii_utag ${file} $((0xcafe0002)) ""
 }
 
-if [ "$1" != "" ]; then
-	build_utags "$1" $target
-else
-	build_utags "$default_cmdline" $target
+if [ "$1" == "" ] || [ "$2" == "" ]; then
+	echo "Usage: $0 output_file cmd_line"
+	exit 1
 fi
+
+target=$1
+cmdline=$2
+build_utags ${target} "${cmdline}"
