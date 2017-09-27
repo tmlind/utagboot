@@ -6,7 +6,7 @@
 # Using "noinitrd" does not seem to work here, use bogus initrd instead
 
 default_cmdline="initrd=0x8000000,128K console=ttyO2,115200 fbcon=rotate:1 \
-root=/dev/mmcblk1p23 rootwait init=/sbin/init"
+root=/dev/mmcblk1p23 rootwait ro init=/sbin/init"
 
 target="utags.bin"
 
