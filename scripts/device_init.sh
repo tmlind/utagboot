@@ -10,7 +10,7 @@ stock_kernel="3.0.8-g448a95f"
 mapphone="mapphone_CDMA"
 
 conf_file="/boot/utagboot/utagboot.conf"
-default_cmdline="console=tty0 console=ttyS2,115200 fbcon=rotate:1 \
+default_cmdline="console=tty0 console=ttyS2,115200 fbcon=rotate:1 rootwait \
 debug earlyprintk earlycon"
 default_dtb="${utagboot_base}/omap4-droid4-xt894.dtb"
 default_vmlinuz="${utagboot_base}/vmlinuz"
