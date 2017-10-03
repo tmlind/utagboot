@@ -21,6 +21,7 @@ args=$1
 init_system() {
 	export path=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 	mount -t proc none /proc
+	mount -t sysfs none /sys
 
 	kernel_version=$(uname -r)
 	hardware=$(grep Hardware /proc/cpuinfo | cut -d' ' -f2)
@@ -52,6 +53,9 @@ load_modules() {
 	if [ "${kernel_version}" == "${stock_kernel}" ] && \
 		[ "${hardware}" == "${mapphone}" ]; then
 		kexec_needed=1
+
+		# Kexec booting at 300MHz rate can be flakey, force 1.2GHz
+		echo 1200000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
 		# Ignore noisy stock kernel kexec..
 		echo 3 > /proc/sysrq-trigger
