@@ -29,11 +29,10 @@ To work around these issues, it's best to use the stock kernel to boot to a
 Linux distro on a selected root partition enough to just kexec boot a newer
 kernel.
 
-Also note that the stock kernel kexec modules still need work to be usable for
-both Motorola custom dtb format and machine ID and for mainline kernel dtb
-format and generic machine id. Currently only kexec booting the mainline
-kernel works and most likely the older kexec modules need to be installed to
-boot the Lineage OS kernel.
+Also note that kexec booting older v3.0.8 based kernels needs to be done
+with the custom kexec binary that comes with SafeStrap. And it seems that
+Lineage OS currently has a dependency to the SafeStrap loop devices being
+configured.
 
 
 BASIC UTAGBOOT SETUP
