@@ -5,8 +5,8 @@ cmdline=$(def_cmd) root=/dev/mmcblk1p23 init=/sbin/init
 target=output/utagboot/
 
 kexec_modules_url=http://muru.com/linux/d4/
-kexec_modules_version=0.3
-kexec_modules=ddroid4-mainline-kexec-$(kexec_modules_version).tar.xz
+kexec_modules_version=0.4
+kexec_modules=droid4-mainline-kexec-$(kexec_modules_version).tar.xz
 stock_kernel_modules=$(target)lib/modules/3.0.8-g448a95f/kernel/
 
 version=$$(date +%Y-%m-%d)
