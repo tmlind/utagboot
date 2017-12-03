@@ -11,13 +11,7 @@ stock_kernel_modules=$(target)lib/modules/3.0.8-g448a95f/kernel/
 
 version=$$(date +%Y-%m-%d)
 
-install: utags
-	fastboot flash utags utags.bin
-
-uninstall:
-	fastboot erase utags
-
-utags: clean
+utags: clean utagboot_utags
 	mkdir -p $(target)
 	echo "Generating default utags.bin using /dev/mmcblk1p23.."
 	scripts/utagboot.sh $(target)utags.bin "$(cmdline)"
@@ -41,6 +35,8 @@ utagboot_utags: clean
 	root=/dev/mmcblk0p3 init=/boot/utagboot/init"
 	scripts/utagboot.sh $(target)utags-mmcblk0p4.bin "$(def_cmd) \
 	root=/dev/mmcblk0p4 init=/boot/utagboot/init"
+	scripts/utagboot.sh $(target)utags-mmcblk1p13.bin "$(def_cmd) \
+	root=/dev/mmcblk1p13 init='/bin/busybox init'"
 	scripts/utagboot.sh $(target)utags-mmcblk1p22.bin "$(def_cmd) \
 	root=/dev/mmcblk1p22 init=/boot/utagboot/init"
 	scripts/utagboot.sh $(target)utags-mmcblk1p23.bin "$(def_cmd) \
@@ -55,6 +51,12 @@ download_files:
 		-o download/$(kexec_modules); \
 		tar xf download/$(kexec_modules) -C download/; \
 	fi
+
+install: utags
+	fastboot flash utags utags.bin
+
+uninstall:
+	fastboot erase utags
 
 install_modules: download_files
 	mkdir -p $(stock_kernel_modules)
