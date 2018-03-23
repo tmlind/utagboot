@@ -36,7 +36,7 @@ utagboot_utags: clean
 	scripts/utagboot.sh $(target)utags-mmcblk0p4.bin "$(def_cmd) \
 	root=/dev/mmcblk0p4 init=/boot/utagboot/init"
 	scripts/utagboot.sh $(target)utags-mmcblk1p13.bin "$(def_cmd) \
-	root=/dev/mmcblk1p13 init='/bin/busybox init'"
+	root=/dev/mmcblk1p13 init=/sbin/preinit.sh"
 	scripts/utagboot.sh $(target)utags-mmcblk1p22.bin "$(def_cmd) \
 	root=/dev/mmcblk1p22 init=/boot/utagboot/init"
 	scripts/utagboot.sh $(target)utags-mmcblk1p23.bin "$(def_cmd) \
