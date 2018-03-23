@@ -1,12 +1,22 @@
 utagboot for Motorola Droid 4 xt894
 
-With utagboot we can boot droid 4 directly to any partition on the device
-using the stock Linux kernel that comes with the device.
+With utagboot we can configure droid 4 utags partition to boot to any
+partition on the device using the stock Linux kernel that comes with the
+device. This tool just generates a utags partition file.
 
 The way utagboot works is by modifying the stock kernel command line arguments
 using the utags partition on the device. The utags partition seems to be
 for custom ATAGs that also show up on the kernel command line. The utags
 partition can be easily erased and flashed with fastboot.
+
+
+USAGE
+
+Typically utagboot is used together with a kexec based minimal rootfs,
+such as droid4-kexecboot. Please see the README for droid4-kexecboot for
+more information:
+
+https://github.com/tmlind/droid4-kexecboot
 
 
 DEPENDENCIES
@@ -35,63 +45,8 @@ Lineage OS currently has a dependency to the SafeStrap loop devices being
 configured.
 
 
-BASIC UTAGBOOT SETUP
-
-The root partition for utagboot needs to use a filesystem supported by the stock
-file system such as ext3 or ext4. And the root partition needs to have a usable
-Linux system with at least busybox, recent kexec-tools and basic /dev entries.
-The root partition needs at least /bin/sh, recent kexec-tools and basic /dev
-entries. So basically pretty much any Linux distro can be used for the root
-partition, and busybox based systems will work just fine too. Then utagboot
-needs the following files installed on the root partition:
-
-/boot/utagboot/utags-mmc*.bin	generated utags for various usable root fs
-/boot/utagboot/init		minimal kexec init script for stock kernel
-/boot/utagboot/lib/modules	uart and kexec modules for stock kernel
-/boot/utagboot/utagboot.conf	optional utagboot configuration file
-
-The init script just kexec boots the configured vmlinuz, dtb and initramfs
-as specified in the utagboot.conf file. The valid options for utagboot.conf
-are:
-
-vmlinuz		kernel to load
-dtb		device tree blob to load
-initramfs	initramfs to load
-cmdline		kernel command line
-
-The init script can be interrupted by pressing 'x' on the serial console.
-Note that the stock kernel often crashes during init so it's not very usable
-with Linux distros.
-
-To build a tar.gz package, type make package. See also the INSTALL file for
-installation.
-
-
 REFERENCES
 
 For more information how utags work, see "fastboot oem vuln: Android Bootloader
 Vulnerabilities in Vendor Customizations" by Roee Hay. I don't think the
 related fastboot oem to modify utags are available on droid 4 though.
-
-
-NOTES
-
-SafeStrap can still be used together with utagboot, but it will be inactive
-when utagboot is active. To use SafeStrap instead, see the uninstall notes.
-
-Usable partitions on the eMMC are mmcblk1p23 and mmcblk1p22. These don't have
-checksums and can be reformatted. Using the 8GB mmcblk1p25 might work too after
-re-formatting it to ext3 or ext4. The stock Android kernel will show notes
-about it though, so please make proper back-ups. It is probably easiest to use
-a reasonably fast micro-SD card as that does not require changes to the eMMC.
-
-In order to use serial console and kexec, you need to load the kexec modules
-uart.ko arm_kexec.ko and kexec.ko when the distro installed to rootfs starts
-booting. For information about using the serial console and the related
-kernel modules, please see:
-
-http://muru.com/linux/d4/
-
-You probably also want copy the modules from the stock file system to the
-new rootfs /lib/modules/3.0.8-g448a95f/kernel to have working WLAN if you
-need to use the stock kernel.
