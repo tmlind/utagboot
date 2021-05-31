@@ -6,8 +6,9 @@ utags: clean droid4_kexecboot
 
 droid4_kexecboot:
 	echo "Generating droid4-kexecboot utags file.."
-	./utagboot.sh utags-droid4-kexecboot-mmcblk1p13.bin "$(def_cmd) \
-	root=/dev/mmcblk1p13 init=/sbin/preinit.sh"
+	./utagboot.sh --filename=utags-droid4-kexecboot-mmcblk1p13.bin \
+	--dtname=p2a_maserati \
+	--cmdline="$(def_cmd) root=/dev/mmcblk1p13 init=/sbin/preinit.sh"
 	hexdump -C utags-droid4-kexecboot-mmcblk1p13.bin
 
 clean:
