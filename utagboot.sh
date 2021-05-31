@@ -29,10 +29,9 @@ function append_ascii_utag() {
 	string=$3
 
 	len=$(echo -n $string | wc -c)
-	if [ "$len" -gt 0 ]; then
-		pad=$((8 - ($len % 8)))
-	else
-		pad=0
+	pad=$(($len % 4))
+	if [ "$pad" -gt 0 ]; then
+		pad=$((4 - $pad))
 	fi
 
 	append_hex_32 $file $type
